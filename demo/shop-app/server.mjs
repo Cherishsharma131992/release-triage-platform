@@ -32,7 +32,7 @@ function home() {
 setTimeout(async () => {
   const r = await fetch('/api/recommendations').then((x) => x.json());
   document.getElementById('recs').textContent = r.items.join(', ');
-}, ${'1000 + Math.random() * 2000'});
+}, ${'2000 + Math.random() * 2000'});
 </script>`);
 }
 
