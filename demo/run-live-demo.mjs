@@ -1,6 +1,7 @@
 // Live end-to-end demo: demo shop with injected bugs -> real Playwright run with Allure output ->
 // platform (live Allure + live Playwright MCP re-validation, Zephyr/Jira from JSON exports) -> dashboard.
 import { spawn } from 'node:child_process';
+import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,6 +18,16 @@ const release = env.DEMO_RELEASE ?? '1.0.0';
 const runId = `demo-run-${new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '').replace('T', '-')}`;
 const resultsRoot = path.join(live, 'allure-results');
 const children = [];
+
+/** Chromium installed by `npx playwright install chromium`, reused for the Playwright MCP re-runs. */
+function bundledChromium() {
+  try {
+    const exe = createRequire(path.join(demoDir, 'package.json'))('@playwright/test').chromium.executablePath();
+    if (fs.existsSync(exe)) return exe;
+  } catch {}
+  console.warn('[demo] No Chromium from `npx playwright install chromium` found; Playwright MCP will look for Google Chrome.');
+  return '';
+}
 
 const log = (msg) => console.log(`\n[demo] ${msg}`);
 
@@ -64,6 +75,7 @@ try {
   fs.writeFileSync(path.join(runDir, 'executor.json'), JSON.stringify({ name: 'Local demo (Playwright)', type: 'local', buildName: runId }, null, 2));
   log(`Playwright finished with exit code ${code} (failures are expected: the shop has injected bugs).`);
 
+  const browserPath = env.PLAYWRIGHT_MCP_EXECUTABLE_PATH || env.DEMO_CHROME_PATH || bundledChromium();
   log(`Starting the platform on http://localhost:${port} (live Allure + Playwright MCP, Zephyr/Jira from demo/data)`);
   start(process.execPath, [path.join(root, 'server', 'dist', 'index.js')], {
     cwd: root,
@@ -79,7 +91,7 @@ try {
       JIRA_ISSUES_FILE: path.join(demoDir, 'data', 'jira-issues.json'),
       REVALIDATION_ADAPTER: 'live',
       PLAYWRIGHT_BASE_URL: shopUrl,
-      PLAYWRIGHT_MCP_EXECUTABLE_PATH: env.PLAYWRIGHT_MCP_EXECUTABLE_PATH ?? env.DEMO_CHROME_PATH ?? '',
+      PLAYWRIGHT_MCP_EXECUTABLE_PATH: browserPath,
     },
   });
   log(`Dashboard: http://localhost:${port}  ·  Demo shop: ${shopUrl}  ·  Ctrl+C to stop. Re-run the demo to add another execution.`);
