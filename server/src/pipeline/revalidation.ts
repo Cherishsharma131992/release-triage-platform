@@ -24,6 +24,17 @@ export function notEligible(summary: string): ValidationResult {
   return { eligible: false, status: 'NOT_ELIGIBLE', attempts: [], summary };
 }
 
+const quotedValues = (s: string | null) => [...(s ?? '').matchAll(/"([^"]{2,})"/g)].map((m) => m[1]);
+
+/**
+ * True when every quoted value in the re-run failure (e.g. the expected text MCP could not find) also appears
+ * in the original error. Runner and MCP word the same unmet expectation differently, so text similarity alone misses it.
+ */
+export function sameUnmetExpectation(rerunError: string | null, originalError: string | null): boolean {
+  const values = quotedValues(rerunError);
+  return values.length > 0 && values.every((v) => (originalError ?? '').includes(`"${v}"`));
+}
+
 /**
  * Re-executes an approved test case through Playwright MCP and compares each attempt with the
  * original failure. All attempts are run (no early exit) so intermittency can be detected.
@@ -51,6 +62,7 @@ export async function revalidate(
         const fp = computeFingerprint(target.testCase.key, run.errorMessage, run.stackTrace);
         signature = fp.signature;
         similarity = fp.signature === target.originalSignature ? 1 : round(textSimilarity(fp.normalizedMessage, original.normalizedMessage));
+        if (sameUnmetExpectation(run.errorMessage, target.errorMessage)) similarity = Math.max(similarity, 0.9);
       }
       attempts.push({ attempt: i, status: run.status, durationMs: run.durationMs, errorMessage: run.errorMessage, signature, similarityToOriginal: similarity, attachments: run.attachments, executedAt });
     } catch (err) {

@@ -6,3 +6,7 @@ data/
 .env
 coverage/
 .playwright-mcp/
+demo/.live/
+demo/test-results/
+demo/allure-results/
+demo/playwright-report/

@@ -33,6 +33,30 @@ On start the platform seeds demo history/waivers and assesses three mock executi
 | `2.14.0-rc.4` | HOLD | Known promo defect without waiver, intermittent failure still needs validation |
 | `2.14.0-rc.5` | GO | Only automation/environment noise; waived known defect |
 
+## Live demo (no external accounts needed)
+
+```bash
+npx playwright install chromium   # once, or set DEMO_CHROME_PATH to an existing Chrome
+npm run demo:live                 # dashboard: http://localhost:4000
+```
+
+This command runs a real pipeline end to end. Only Zephyr and Jira are replaced by JSON exports in `demo/data`, because they need accounts:
+
+1. Starts the **demo shop** (`demo/shop-app`) with injected bugs (`BUGS=vat,search`).
+2. Runs a **real Playwright suite** (`demo/e2e`, 14 tests). The `allure-playwright` reporter writes real Allure results with real screenshots to `demo/.live/allure-results/<run>`.
+3. Starts the platform with live Allure (`RESULTS_ADAPTER=live`) and **real Playwright MCP re-runs** (`REVALIDATION_ADAPTER=live`) against the shop. Zephyr test cases and Jira issues come from `demo/data/*.json` (`TCM_ADAPTER=file`, `DEFECTS_ADAPTER=file`).
+
+| Test | Failure cause in the demo | Expected triage |
+|---|---|---|
+| DEMO-T6 German VAT | Real app bug (`vat`) | Reproduced by MCP → application defect, business-critical → NO-GO |
+| DEMO-T4 Search | Real app bug (`search`), open Jira DEMO-101 | Matched to the existing Jira issue |
+| DEMO-T9 Recommendations | Test waits too briefly | MCP re-run passes → timing/sync |
+| DEMO-T10 Price labels | Bug in the test script (`TypeError`) | MCP re-run passes → automation script |
+| DEMO-T11 Inventory health | Service not running (`ECONNREFUSED`) | Environment |
+| DEMO-T12 Loyalty login | Seed user missing | Test data |
+
+Run it again to add another execution; history then marks repeats as recurring. Use `BUGS=` (empty) for a clean build.
+
 ## Architecture
 
 | Area | Location |
