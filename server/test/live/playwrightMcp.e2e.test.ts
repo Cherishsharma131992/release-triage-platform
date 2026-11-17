@@ -59,6 +59,13 @@ describe.skipIf(!enabled)('PlaywrightMcpAdapter (real MCP server)', () => {
     expect(r.errorMessage).toMatch(/^Step 2 \(Expected: "Welcome back" is visible\) failed: TimeoutError/);
   }, 90_000);
 
+  it('reports a browser that cannot start as an error, not a test failure', async () => {
+    const store = new Store(':memory:');
+    const adapter = new PlaywrightMcpAdapter({ ...playwrightMcpConfigFromEnv({}), baseUrl, executablePath: '/nonexistent/chrome', stepTimeoutMs: 20_000 }, store);
+    expect((await adapter.healthCheck()).ok).toBe(false);
+    await expect(adapter.runTestCase({ executionId: 'e2e', testCase: tc([['Navigate to /', '']]), attempt: 1, originalErrorMessage: null, originalStackTrace: null })).rejects.toThrow(/could not start the browser/);
+  }, 90_000);
+
   it('refuses free-text steps', async () => {
     await expect(run(tc([['Log in as a gold customer', '']])).promise).rejects.toThrow(/automatable/);
   });

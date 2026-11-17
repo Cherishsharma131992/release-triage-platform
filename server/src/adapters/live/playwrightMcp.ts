@@ -32,6 +32,9 @@ interface ToolResult {
   content?: Array<{ type: string; text?: string; data?: string; mimeType?: string }>;
 }
 
+/** Errors where the browser itself could not run: the attempt is inconclusive, not a test failure. */
+const BROWSER_START_ERROR = /initializeServer|browserType\.launch|Executable doesn't exist|distribution '[^']+' is not found|Failed to launch|Target page, context or browser has been closed/i;
+
 const textOf = (r: ToolResult) => (r.content ?? []).filter((c) => c.type === 'text').map((c) => c.text ?? '').join('\n');
 const errorOf = (r: ToolResult) => textOf(r).replace(/^### Error\s*/, '').trim();
 
@@ -67,7 +70,10 @@ export class PlaywrightMcpAdapter implements RevalidationAdapter {
       const missing = ['browser_navigate', 'browser_click', 'browser_type', 'browser_wait_for', 'browser_take_screenshot'].filter(
         (t) => !tools.some((x) => x.name === t),
       );
-      return missing.length ? { ok: false, message: `Playwright MCP server lacks tools: ${missing.join(', ')}` } : { ok: true };
+      if (missing.length) return { ok: false, message: `Playwright MCP server lacks tools: ${missing.join(', ')}` };
+      const probe = (await client.callTool({ name: 'browser_navigate', arguments: { url: 'about:blank' } })) as ToolResult;
+      if (probe.isError) return { ok: false, message: `Playwright MCP could not start the browser: ${errorOf(probe).split('\n')[0]}` };
+      return { ok: true };
     } catch (err) {
       return { ok: false, message: `Playwright MCP unreachable: ${(err as Error).message}` };
     } finally {
@@ -94,6 +100,9 @@ export class PlaywrightMcpAdapter implements RevalidationAdapter {
         log.push(`mcp> ${action.tool} ${JSON.stringify(action.args)}`);
         const res = (await client.callTool({ name: action.tool, arguments: action.args }, undefined, { timeout: this.cfg.stepTimeoutMs })) as ToolResult;
         const ok = !res.isError;
+        if (!ok && BROWSER_START_ERROR.test(errorOf(res))) {
+          throw new Error(`Playwright MCP could not start the browser: ${errorOf(res).split('\n')[0]}`);
+        }
         log.push(ok ? textOf(res).split('\n').slice(0, 6).join('\n') : `ERROR ${errorOf(res)}`);
         trace.push({ step: action.step, action: action.description, tool: action.tool, status: ok ? 'passed' : 'failed', ms: Date.now() - t0 });
         if (!ok) failure = { action, message: errorOf(res) };
