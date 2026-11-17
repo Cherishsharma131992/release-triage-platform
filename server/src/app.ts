@@ -81,7 +81,7 @@ export function createApp({ store, adapters, service, policy, webDist }: AppDeps
   app.get('/api/artifacts/:id', (req, res) => {
     const a = store.getArtifact(req.params.id);
     if (!a) return res.status(404).json({ error: 'Artifact not found' });
-    res.type(a.contentType).send(a.content);
+    res.type(a.contentType).send(a.encoding === 'base64' ? Buffer.from(a.content, 'base64') : a.content);
   });
 
   if (webDist && fs.existsSync(path.join(webDist, 'index.html'))) {

@@ -1,7 +1,12 @@
 node_modules/
 dist/
-data/
+/server/data/
 *.db
 *.db-journal
 .env
 coverage/
+.playwright-mcp/
+demo/.live/
+demo/test-results/
+demo/allure-results/
+demo/playwright-report/

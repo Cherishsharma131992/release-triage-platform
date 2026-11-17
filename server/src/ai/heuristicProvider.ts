@@ -35,6 +35,18 @@ const RULES: Rule[] = [
     signal: 'Wait/synchronization timeout on UI element',
   },
   {
+    classification: 'TIMING_SYNC',
+    weight: 1.0,
+    pattern: /Received:\s*"[^"]*(loading|please wait|…|\.\.\.)[^"]*"/i,
+    signal: 'Assertion captured a loading/transient state instead of the final value',
+  },
+  {
+    classification: 'APPLICATION_DEFECT',
+    weight: 1.0,
+    pattern: /Received:\s*"(?![^"]*(loading|please wait|…|\.\.\.))[^"]*"/i,
+    signal: 'Element was found but showed a different value than expected',
+  },
+  {
     classification: 'APPLICATION_DEFECT',
     weight: 0.6,
     pattern: /expect\(.*\)\.(toBe|toEqual|toHaveText|toContainText|toHaveCount|toHaveValue|toHaveURL|toContain|toBeGreaterThan)|AssertionError|500 Internal Server Error|status(Code)? 500|Unhandled exception|Payment failed/i,
@@ -165,6 +177,14 @@ export class HeuristicProvider implements AIProvider {
       case 'REPRODUCED':
         if (c === 'FLAKY' || c === 'INCONCLUSIVE') {
           return this.build('APPLICATION_DEFECT', 0.6, [...reasoning, 'Failure reproduced consistently on every attempt, so it is not intermittent.'], initial.signals);
+        }
+        if (c === 'TIMING_SYNC') {
+          return this.build(
+            'APPLICATION_DEFECT',
+            0.7,
+            [...reasoning, 'Reproduced on every re-execution despite extended waits, so a synchronization problem is unlikely; treating as an application defect.'],
+            initial.signals,
+          );
         }
         return keep(Math.max(initial.confidence + 0.1, c === 'APPLICATION_DEFECT' ? 0.9 : 0.75), 'Same failure signature reproduced on every re-execution.');
       case 'INTERMITTENT':
