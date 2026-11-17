@@ -1,0 +1,75 @@
+# Deterministic release decision policy.
+# The decision (GO / NO_GO / HOLD) is computed only from these rules; the LLM only explains it.
+policy:
+  name: Default Production Release Policy
+  version: 1.0.0
+  owner: Release Governance Board
+  effectiveFrom: "2026-01-01"
+
+thresholds:
+  minPassRate: 90              # % of executed (non-skipped) tests that must pass
+  maxRiskScore: 60             # 0-100, above this the release is NO_GO
+  minConfidenceForCritical: 0.5 # AI confidence required on business-critical failures
+
+blockingDefects:
+  severities: [Blocker, Critical]
+  priorities: [Highest]
+
+validation:
+  enabled: true
+  attempts: 3                          # Playwright MCP re-executions per eligible failure
+  reproductionSimilarityThreshold: 0.75
+  inconclusiveScope: business-critical # business-critical | all
+
+risk:
+  levels: { low: 25, medium: 50, high: 75 }
+  severityWeights: { Blocker: 40, Critical: 30, Major: 12, Minor: 4, Trivial: 1 }
+  waivedMultiplier: 0.25
+  classificationWeights:
+    APPLICATION_DEFECT: 25
+    INCONCLUSIVE: 10
+    TIMING_SYNC: 3
+    ENVIRONMENT: 3
+    FLAKY: 2
+    AUTOMATION_SCRIPT: 2
+    TEST_DATA: 2
+  businessCriticalMultiplier: 1.5
+  passRatePenaltyPerPoint: 2
+
+rules:
+  - id: REL-001
+    check: min-pass-rate
+    name: Minimum execution pass rate
+    onFail: NO_GO
+  - id: REL-002
+    check: no-unwaived-blocking-defects
+    name: No unresolved release-blocking defects
+    onFail: NO_GO
+  - id: REL-003
+    check: no-validated-high-impact-new-defects
+    name: No validated high-impact new application defects
+    onFail: NO_GO
+  - id: REL-004
+    check: business-critical-functionality-passed
+    name: Business-critical functionality passed validation
+    onFail: NO_GO
+  - id: REL-005
+    check: risk-within-threshold
+    name: Release risk within approved threshold
+    onFail: NO_GO
+  - id: REL-006
+    check: known-defects-approved
+    name: Known open defects have business approval / waiver
+    onFail: HOLD
+  - id: REL-007
+    check: critical-validation-complete
+    name: Critical failure validation complete
+    onFail: HOLD
+  - id: REL-008
+    check: integrations-available
+    name: Required integration data available
+    onFail: HOLD
+  - id: REL-009
+    check: sufficient-evidence
+    name: Sufficient evidence for business-critical failures
+    onFail: HOLD
