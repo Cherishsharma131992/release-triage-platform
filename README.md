@@ -55,7 +55,7 @@ This command runs a real pipeline end to end. Only Zephyr and Jira are replaced 
 | DEMO-T11 Inventory health | Service not running (`ECONNREFUSED`) | Environment |
 | DEMO-T12 Loyalty login | Seed user missing | Test data |
 
-Run it again to add another execution; history then marks repeats as recurring. Use `BUGS=` (empty) for a clean build.
+Add `HEADED=1` to watch Chrome run the suite and the Playwright MCP re-runs, slowed down (`SLOW_MO`, `PLAYWRIGHT_MCP_STEP_DELAY_MS`). Run it again to add another execution; history then marks repeats as recurring. Use `BUGS=` (empty) for a clean build.
 
 ## Architecture
 

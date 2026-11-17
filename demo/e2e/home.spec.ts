@@ -10,6 +10,6 @@ test('Home page loads', async ({ page }) => {
 test('Home page shows recommendations', async ({ page }) => {
   await zephyr('DEMO-T9', 'e2e/home.spec.ts');
   await page.goto('/');
-  // Too-short wait on purpose: recommendations load after 1-3s, so this fails on timing, not on a product bug.
+  // Too-short wait on purpose: recommendations load after 2-4s, so this fails on timing, not on a product bug.
   await expect(page.locator('#recs')).toHaveText('Desk Lamp, Monitor Arm', { timeout: 800 });
 });

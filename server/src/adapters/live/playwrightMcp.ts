@@ -15,6 +15,10 @@ export interface PlaywrightMcpConfig {
   executablePath: string | null;
   extraArgs: string[];
   stepTimeoutMs: number;
+  /** Spawned browser runs headless unless PLAYWRIGHT_MCP_HEADLESS=false (useful for watching re-runs). */
+  headless: boolean;
+  /** Pause between steps, e.g. to follow a headed re-run. */
+  stepDelayMs: number;
 }
 
 export function playwrightMcpConfigFromEnv(env: NodeJS.ProcessEnv): PlaywrightMcpConfig {
@@ -24,6 +28,8 @@ export function playwrightMcpConfigFromEnv(env: NodeJS.ProcessEnv): PlaywrightMc
     executablePath: env.PLAYWRIGHT_MCP_EXECUTABLE_PATH?.trim() || null,
     extraArgs: (env.PLAYWRIGHT_MCP_ARGS ?? '').split(' ').filter(Boolean),
     stepTimeoutMs: Number(env.PLAYWRIGHT_MCP_STEP_TIMEOUT_MS ?? 60_000),
+    headless: (env.PLAYWRIGHT_MCP_HEADLESS ?? 'true').toLowerCase() !== 'false',
+    stepDelayMs: Number(env.PLAYWRIGHT_MCP_STEP_DELAY_MS ?? 0),
   };
 }
 
@@ -55,7 +61,7 @@ export class PlaywrightMcpAdapter implements RevalidationAdapter {
       await client.connect(new StreamableHTTPClientTransport(new URL(this.cfg.serverUrl)));
     } else {
       const cli = path.join(path.dirname(require.resolve('@playwright/mcp/package.json')), 'cli.js');
-      const args = [cli, '--headless', '--isolated', '--output-dir', path.join(os.tmpdir(), 'playwright-mcp'), ...this.cfg.extraArgs];
+      const args = [cli, ...(this.cfg.headless ? ['--headless'] : []), '--isolated', '--output-dir', path.join(os.tmpdir(), 'playwright-mcp'), ...this.cfg.extraArgs];
       if (this.cfg.executablePath) args.push('--executable-path', this.cfg.executablePath);
       await client.connect(new StdioClientTransport({ command: process.execPath, args, stderr: 'ignore' }));
     }
@@ -96,6 +102,7 @@ export class PlaywrightMcpAdapter implements RevalidationAdapter {
           trace.push({ step: action.step, action: action.description, tool: action.tool, status: 'skipped', ms: 0 });
           continue;
         }
+        if (this.cfg.stepDelayMs > 0) await new Promise((r) => setTimeout(r, this.cfg.stepDelayMs));
         const t0 = Date.now();
         log.push(`mcp> ${action.tool} ${JSON.stringify(action.args)}`);
         const res = (await client.callTool({ name: action.tool, arguments: action.args }, undefined, { timeout: this.cfg.stepTimeoutMs })) as ToolResult;

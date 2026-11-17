@@ -15,6 +15,7 @@ const shopUrl = `http://127.0.0.1:${shopPort}`;
 const port = Number(env.PORT ?? 4000);
 const bugs = env.BUGS ?? 'vat,search';
 const release = env.DEMO_RELEASE ?? '1.0.0';
+const headed = env.HEADED === '1' || env.HEADED === 'true';
 const runId = `demo-run-${new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '').replace('T', '-')}`;
 const resultsRoot = path.join(live, 'allure-results');
 const children = [];
@@ -66,7 +67,7 @@ try {
   await waitFor(`${shopUrl}/health`);
 
   const runDir = path.join(resultsRoot, runId);
-  log(`Running the Playwright suite -> Allure results in ${path.relative(root, runDir)}`);
+  log(`Running the Playwright suite${headed ? ' (headed, slowed down)' : ''} -> Allure results in ${path.relative(root, runDir)}`);
   const suite = start(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['playwright', 'test'], {
     cwd: demoDir,
     env: { ...env, SHOP_URL: shopUrl, ALLURE_RUN_DIR: runDir, DEMO_BUILD: runId, DEMO_RELEASE: release },
@@ -92,6 +93,7 @@ try {
       REVALIDATION_ADAPTER: 'live',
       PLAYWRIGHT_BASE_URL: shopUrl,
       PLAYWRIGHT_MCP_EXECUTABLE_PATH: browserPath,
+      ...(headed ? { PLAYWRIGHT_MCP_HEADLESS: 'false', PLAYWRIGHT_MCP_STEP_DELAY_MS: env.PLAYWRIGHT_MCP_STEP_DELAY_MS ?? '600' } : {}),
     },
   });
   log(`Dashboard: http://localhost:${port}  ·  Demo shop: ${shopUrl}  ·  Ctrl+C to stop. Re-run the demo to add another execution.`);
