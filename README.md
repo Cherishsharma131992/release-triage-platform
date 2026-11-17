@@ -58,7 +58,8 @@ On start the platform seeds demo history/waivers and assesses three mock executi
 | `PORT` | `4000` | HTTP port |
 | `DB_PATH` | `server/data/triage.db` | SQLite file |
 | `POLICY_PATH` | `server/config/release-policy.yaml` | Release policy |
-| `ADAPTER_MODE` | `mock` | Only `mock` is implemented today |
+| `ADAPTER_MODE` | `mock` | `mock` or `live`; per-integration overrides below |
+| `SEED_DEMO_DATA` | `true` with mock results | Seed demo history/waivers |
 | `MOCK_UNAVAILABLE` | – | Simulate outages, e.g. `jira,playwright` |
 | `POLL_INTERVAL_MS` | `60000` | How often to look for completed executions |
 | `LLM_PROVIDER` / `LLM_API_KEY` / `LLM_MODEL` / `LLM_BASE_URL` | – | Optional `openai` or `anthropic` provider; falls back to the built-in heuristic on error |
@@ -75,5 +76,23 @@ On start the platform seeds demo history/waivers and assesses three mock executi
 | GET | `/api/policy` | Active release policy |
 | GET | `/api/artifacts/:id` | Screenshots, logs, traces |
 
-## Going live
-Implement the interfaces in `server/src/adapters/types.ts` for Allure TestOps / report files, Zephyr Scale, Jira Cloud and a Playwright MCP server, then wire them in `server/src/bootstrap.ts`.
+## Live integrations
+
+Each integration can be switched independently (`mock` | `live`), so you can connect Jira first and keep the rest mocked. See `.env.example`.
+
+| Integration | Switch | Live settings |
+|---|---|---|
+| Allure results (CI `allure-results` dirs) | `RESULTS_ADAPTER` | `ALLURE_RESULTS_DIR`: one sub-directory per execution. Release/environment from `environment.properties` (`RELEASE`, `ENVIRONMENT`), build/CI link from `executor.json`. Retries collapse to the last attempt. |
+| Zephyr Scale Cloud (API v2) | `TCM_ADAPTER` | `ZEPHYR_API_TOKEN`, optional `ZEPHYR_BASE_URL` (EU: `https://eu.api.zephyrscale.smartbear.com/v2`). Custom fields/labels: `Automation Script`, `Business Critical` / `business-critical`, `Playwright Revalidation` / `playwright-revalidation`, `Component`. |
+| Jira Cloud (REST v3) | `DEFECTS_ADAPTER` | `JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN`, `JIRA_PROJECT_KEYS`, optional `JIRA_SEVERITY_FIELD` (e.g. `customfield_10050`, otherwise severity is derived from priority) and `JIRA_BUG_ISSUE_TYPES`. Test case keys in labels/summary become direct links. |
+| Playwright MCP | `REVALIDATION_ADAPTER` | `PLAYWRIGHT_BASE_URL` (app under test). `PLAYWRIGHT_MCP_URL` for a running server (Streamable HTTP); otherwise `@playwright/mcp` is spawned headless per attempt (`PLAYWRIGHT_MCP_EXECUTABLE_PATH` to pick a browser). |
+
+### Re-validation step format
+Only Zephyr test cases approved for re-validation are re-run, and their steps must use this grammar. A step outside it makes the attempt **inconclusive**; the platform never guesses.
+
+```
+Navigate to /login                      Click button "Sign in"      Click {getByTestId("checkout")}
+Enter "qa@shop.io" into "Email"         Fill "Password" with "x"    Select "EUR" from "Currency"
+Press Enter                             Wait 2 seconds              Verify text "Welcome back" is visible
+```
+Every quoted string in a step's *expected result* is asserted as visible text. The real-browser test runs with `PLAYWRIGHT_MCP_E2E=1 npm test -w server`.

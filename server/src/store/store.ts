@@ -22,6 +22,8 @@ export interface StoredArtifact {
   name: string;
   contentType: string;
   content: string;
+  /** Binary artifacts (e.g. PNG screenshots) are stored base64-encoded. */
+  encoding?: 'utf8' | 'base64';
 }
 
 export interface ArtifactSink {
@@ -90,19 +92,23 @@ export class Store implements ArtifactSink {
         content TEXT NOT NULL
       );
     `);
+    const artifactCols = this.db.prepare('PRAGMA table_info(artifacts)').all() as Array<{ name: string }>;
+    if (!artifactCols.some((c) => c.name === 'encoding')) {
+      this.db.exec("ALTER TABLE artifacts ADD COLUMN encoding TEXT NOT NULL DEFAULT 'utf8'");
+    }
   }
 
   putArtifact(a: StoredArtifact): void {
     this.db
-      .prepare('INSERT OR REPLACE INTO artifacts (id, name, content_type, content) VALUES (?, ?, ?, ?)')
-      .run(a.id, a.name, a.contentType, a.content);
+      .prepare('INSERT OR REPLACE INTO artifacts (id, name, content_type, content, encoding) VALUES (?, ?, ?, ?, ?)')
+      .run(a.id, a.name, a.contentType, a.content, a.encoding ?? 'utf8');
   }
 
   getArtifact(id: string): StoredArtifact | undefined {
-    const row = this.db.prepare('SELECT id, name, content_type, content FROM artifacts WHERE id = ?').get(id) as
-      | { id: string; name: string; content_type: string; content: string }
+    const row = this.db.prepare('SELECT id, name, content_type, content, encoding FROM artifacts WHERE id = ?').get(id) as
+      | { id: string; name: string; content_type: string; content: string; encoding: 'utf8' | 'base64' }
       | undefined;
-    return row && { id: row.id, name: row.name, contentType: row.content_type, content: row.content };
+    return row && { id: row.id, name: row.name, contentType: row.content_type, content: row.content, encoding: row.encoding };
   }
 
   private mapHistory(row: Record<string, unknown>): HistoryRecord {

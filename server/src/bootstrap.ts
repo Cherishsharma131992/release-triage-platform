@@ -1,4 +1,4 @@
-import { createMockAdapters } from './adapters/mock';
+import { adapterSelection, createAdapters } from './adapters/live';
 import type { Adapters } from './adapters/types';
 import { createAIProvider, type AIProvider } from './ai';
 import { AssessmentService } from './pipeline/assessmentService';
@@ -9,7 +9,8 @@ import { Store } from './store/store';
 export interface BootstrapOptions {
   dbPath: string;
   policyPath: string;
-  adapterMode?: string;
+  /** Adapter selection and live-integration settings (defaults to process.env). */
+  env?: NodeJS.ProcessEnv;
   mockUnavailable?: string[];
   seedDemoData?: boolean;
   ai?: AIProvider;
@@ -17,15 +18,14 @@ export interface BootstrapOptions {
 
 export function bootstrap(opts: BootstrapOptions) {
   const store = new Store(opts.dbPath);
-  if (opts.adapterMode && opts.adapterMode !== 'mock') {
-    throw new Error(`ADAPTER_MODE=${opts.adapterMode} is not implemented yet; only "mock" is available.`);
-  }
-  const adapters: Adapters = createMockAdapters(store, opts.mockUnavailable ?? []);
-  if (opts.seedDemoData ?? true) seedDemoData(store);
+  const env = opts.env ?? process.env;
+  const adapters: Adapters = createAdapters(env, store, opts.mockUnavailable ?? []);
+  const selection = adapterSelection(env);
+  if (opts.seedDemoData ?? selection.results === 'mock') seedDemoData(store);
   // Re-read on every assessment so policy edits apply without a restart.
   const policy = (): ReleasePolicy => loadPolicy(opts.policyPath);
   policy();
   const ai = opts.ai ?? createAIProvider();
   const service = new AssessmentService({ adapters, ai, policy, store });
-  return { store, adapters, policy, ai, service };
+  return { store, adapters, selection, policy, ai, service };
 }
