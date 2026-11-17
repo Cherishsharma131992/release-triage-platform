@@ -5,7 +5,9 @@ export type * from '../../server/src/domain/types';
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.error ?? `HTTP ${res.status}`);
+    const issues: Array<{ path: string[]; message: string }> = body.issues ?? [];
+    const detail = issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+    throw new Error([body.error ?? `HTTP ${res.status}`, detail].filter(Boolean).join(' — '));
   }
   return res.json() as Promise<T>;
 }
