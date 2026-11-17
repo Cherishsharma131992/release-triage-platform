@@ -1,0 +1,75 @@
+[
+  {
+    "key": "DEMO-101",
+    "summary": "Product search is case-sensitive: 'lamp' does not find 'Desk Lamp'",
+    "description": "Searching with lowercase terms returns no products because the search compares names case-sensitively.",
+    "issueType": "Bug",
+    "status": "In Progress",
+    "statusCategory": "In Progress",
+    "severity": "Major",
+    "priority": "High",
+    "components": [
+      "Search"
+    ],
+    "labels": [],
+    "affectsVersions": [
+      "1.0.0"
+    ],
+    "fixVersions": [],
+    "linkedTestCases": [
+      "DEMO-T4"
+    ],
+    "created": "2026-11-10T09:00:00Z",
+    "updated": "2026-11-16T12:00:00Z",
+    "resolutionDate": null,
+    "url": "https://demo-shop.atlassian.net/browse/DEMO-101"
+  },
+  {
+    "key": "DEMO-110",
+    "summary": "Order confirmation email arrives late",
+    "description": "Confirmation emails are delayed by several minutes under load.",
+    "issueType": "Bug",
+    "status": "To Do",
+    "statusCategory": "To Do",
+    "severity": "Minor",
+    "priority": "Low",
+    "components": [
+      "Notifications"
+    ],
+    "labels": [],
+    "affectsVersions": [
+      "1.0.0"
+    ],
+    "fixVersions": [],
+    "linkedTestCases": [],
+    "created": "2026-11-12T09:00:00Z",
+    "updated": "2026-11-12T09:00:00Z",
+    "resolutionDate": null,
+    "url": "https://demo-shop.atlassian.net/browse/DEMO-110"
+  },
+  {
+    "key": "DEMO-95",
+    "summary": "Sign in button misaligned on small screens",
+    "description": "Layout issue on the login page below 360px.",
+    "issueType": "Bug",
+    "status": "Done",
+    "statusCategory": "Done",
+    "severity": "Trivial",
+    "priority": "Lowest",
+    "components": [
+      "Authentication"
+    ],
+    "labels": [],
+    "affectsVersions": [
+      "0.9.0"
+    ],
+    "fixVersions": [],
+    "linkedTestCases": [
+      "DEMO-T1"
+    ],
+    "created": "2026-10-01T09:00:00Z",
+    "updated": "2026-10-05T09:00:00Z",
+    "resolutionDate": "2026-10-05T09:00:00Z",
+    "url": "https://demo-shop.atlassian.net/browse/DEMO-95"
+  }
+]
