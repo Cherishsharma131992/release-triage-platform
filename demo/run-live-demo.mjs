@@ -68,8 +68,10 @@ try {
 
   const runDir = path.join(resultsRoot, runId);
   log(`Running the Playwright suite${headed ? ' (headed, slowed down)' : ''} -> Allure results in ${path.relative(root, runDir)}`);
+  // Windows needs a shell to run npx.cmd (Node refuses to spawn .cmd files directly).
   const suite = start(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['playwright', 'test'], {
     cwd: demoDir,
+    shell: process.platform === 'win32',
     env: { ...env, SHOP_URL: shopUrl, ALLURE_RUN_DIR: runDir, DEMO_BUILD: runId, DEMO_RELEASE: release },
   });
   const code = await exited(suite);
