@@ -104,4 +104,4 @@ a fixed rulebook (the release policy) → shows GO, NO-GO or HOLD on a dashboard
   [.nvmrc](nvmrc.md) ·
   [package-lock.json](package-lock.md) ·
   [TypeScript configs](tsconfigs.md) ·
-  [README.md](readme.md)
+  [README.md](root-readme.md)
