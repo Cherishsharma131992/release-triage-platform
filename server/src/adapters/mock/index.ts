@@ -1,7 +1,8 @@
 import type { ArtifactSink } from '../../store/store';
 import type { Adapters } from '../types';
 import { MockAllureAdapter } from './mockAllure';
-import { MockJiraAdapter } from './mockJira';
+import path from 'path';
+import { FileDefectAdapter } from '../live/fileAdapters';
 import { MockPlaywrightMcpAdapter } from './mockPlaywrightMcp';
 import { MockZephyrAdapter } from './mockZephyr';
 
@@ -11,7 +12,8 @@ export function createMockAdapters(artifacts: ArtifactSink, unavailable: string[
   return {
     results: new MockAllureAdapter(artifacts, up('allure')),
     testCases: new MockZephyrAdapter(up('zephyr')),
-    defects: new MockJiraAdapter(up('jira')),
+    // Mock mode reads the bundled Jira seed through the file adapter (no separate mock Jira adapter).
+    defects: new FileDefectAdapter(path.resolve(__dirname, '../../../data-seeds/jira-issues.json'), up('jira')),
     revalidation: new MockPlaywrightMcpAdapter(artifacts, up('playwright')),
   };
 }

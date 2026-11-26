@@ -67,7 +67,7 @@ describe('end-to-end triage pipeline', () => {
     const { byExec } = await runAll(['jira']);
     const a = byExec.get('exec-2.14.0-rc.5')!;
     expect(a.decision.decision).toBe('HOLD');
-    expect(a.integrations.find((i) => i.adapter === 'mock-jira-cloud')?.status).toBe('UNAVAILABLE');
+    expect(a.integrations.find((i) => i.adapter === 'file-jira')?.status).toBe('UNAVAILABLE');
   });
 
   it('exposes the assessment over the API', async () => {
