@@ -36,11 +36,10 @@ a fixed rulebook (the release policy) → shows GO, NO-GO or HOLD on a dashboard
   [factory](server/adapters-mock-index.md) ·
   [Allure](server/adapters-mock-mockAllure.md) ·
   [Zephyr](server/adapters-mock-mockZephyr.md) ·
-  [Jira](server/adapters-mock-mockJira.md) ·
   [Playwright](server/adapters-mock-mockPlaywrightMcp.md) ·
   [artifacts](server/adapters-mock-artifacts.md) ·
   [failure data](server/adapters-mock-data-failures.md) ·
-  [Jira data](server/adapters-mock-data-jiraIssues.md) ·
+  [Jira seed data](server/data-seeds-jira-issues.md) ·
   [test-case data](server/adapters-mock-data-testCases.md)
 - AI (the "thinking" part):
   [contract](server/ai-provider.md) ·

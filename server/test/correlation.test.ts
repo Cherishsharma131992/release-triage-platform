@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { FAILURE_LIBRARY } from '../src/adapters/mock/data/failures';
-import { JIRA_ISSUES } from '../src/adapters/mock/data/jiraIssues';
+import fs from 'fs';
+import path from 'path';
 import { TEST_CASES } from '../src/adapters/mock/data/testCases';
 import { correlateWithJira } from '../src/pipeline/jiraCorrelation';
 
+const JIRA_ISSUES = JSON.parse(fs.readFileSync(path.join(__dirname, '../data-seeds/jira-issues.json'), 'utf8'));
 const open = JIRA_ISSUES.filter((i) => i.statusCategory !== 'Done');
 const input = (key: string) => {
   const tc = TEST_CASES.find((t) => t.key === key)!;
