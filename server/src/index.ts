@@ -1,3 +1,4 @@
+import './loadEnv';
 import { createApp } from './app';
 import { bootstrap } from './bootstrap';
 import { config } from './config';

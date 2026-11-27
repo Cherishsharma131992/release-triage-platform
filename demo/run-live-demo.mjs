@@ -9,6 +9,9 @@ import { fileURLToPath } from 'node:url';
 const demoDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(demoDir, '..');
 const live = path.join(demoDir, '.live');
+// Settings from the repo-root .env (e.g. live Jira); variables already set in the shell win.
+const envFile = process.env.ENV_FILE ?? path.join(root, '.env');
+if (fs.existsSync(envFile)) process.loadEnvFile(envFile);
 const env = process.env;
 const shopPort = Number(env.SHOP_PORT ?? 4100);
 const shopUrl = `http://127.0.0.1:${shopPort}`;
