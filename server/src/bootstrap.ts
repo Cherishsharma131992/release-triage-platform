@@ -1,5 +1,5 @@
-import { adapterSelection, createAdapters } from './adapters/live';
-import type { Adapters } from './adapters/types';
+import { adapterSelection, createAdapters } from './integrations';
+import type { Adapters } from './integrations/types';
 import { createAIProvider, type AIProvider } from './ai';
 import { AssessmentService } from './pipeline/assessmentService';
 import { loadPolicy, type ReleasePolicy } from './policy/policy';

@@ -1,4 +1,4 @@
-import { FAILURE_LIBRARY, HISTORY_SEEDS, WAIVER_SEEDS } from '../adapters/mock/data/failures';
+import { FAILURE_LIBRARY, HISTORY_SEEDS, WAIVER_SEEDS } from '../integrations/mock-data/failures';
 import type { FailureClassification } from '../domain/types';
 import { computeFingerprint } from '../pipeline/fingerprint';
 import type { HistoryRecord, Store } from './store';

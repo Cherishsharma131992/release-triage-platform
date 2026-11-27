@@ -8,5 +8,6 @@ coverage/
 .playwright-mcp/
 demo/.live/
 demo/test-results/
-demo/allure-results/
+demo/allure-reports/*
+!demo/allure-reports/README.md
 demo/playwright-report/

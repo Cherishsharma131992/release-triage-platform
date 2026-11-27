@@ -1,4 +1,4 @@
-import type { Adapters, AdapterBase } from '../adapters/types';
+import type { Adapters, AdapterBase } from '../integrations/types';
 import type { AIProvider, FailureAnalysisInput } from '../ai/provider';
 import type {
   Assessment,

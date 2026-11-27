@@ -2,7 +2,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { afterAll, describe, expect, it } from 'vitest';
-import { AllureResultsDirAdapter, parseProperties } from '../../src/adapters/live/allureResults';
+import { AllureResultsDirAdapter, parseProperties } from '../../src/integrations/allure/allureResults';
 import { createApp } from '../../src/app';
 import { bootstrap } from '../../src/bootstrap';
 import { HeuristicProvider } from '../../src/ai/heuristicProvider';

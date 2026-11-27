@@ -1,4 +1,4 @@
-import type { AutomationResultsAdapter } from '../adapters/types';
+import type { AutomationResultsAdapter } from '../integrations/types';
 import type { Store } from '../store/store';
 import type { AssessmentService } from './assessmentService';
 

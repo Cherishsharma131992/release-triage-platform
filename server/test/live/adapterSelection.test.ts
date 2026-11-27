@@ -1,6 +1,6 @@
 import path from 'path';
 import { describe, expect, it } from 'vitest';
-import { adapterSelection, createAdapters } from '../../src/adapters/live';
+import { adapterSelection, createAdapters } from '../../src/integrations';
 import { Store } from '../../src/store/store';
 
 describe('adapter selection', () => {
@@ -22,8 +22,8 @@ describe('adapter selection', () => {
   });
 
   it('reads the demo Zephyr/Jira exports', async () => {
-    const demo = path.join(__dirname, '..', '..', '..', 'demo', 'data');
-    const a = createAdapters({ TCM_ADAPTER: 'file', ZEPHYR_TESTCASES_FILE: path.join(demo, 'zephyr-testcases.json'), DEFECTS_ADAPTER: 'file', JIRA_ISSUES_FILE: path.join(demo, 'jira-issues.json') }, new Store(':memory:'));
+    const demo = path.join(__dirname, '..', '..', '..', 'demo', 'integrations');
+    const a = createAdapters({ TCM_ADAPTER: 'file', ZEPHYR_TESTCASES_FILE: path.join(demo, 'zephyr', 'zephyr-testcases.json'), DEFECTS_ADAPTER: 'file', JIRA_ISSUES_FILE: path.join(demo, 'jira', 'jira-issues.json') }, new Store(':memory:'));
     expect((await a.testCases.getTestCases(['DEMO-T6', 'NOPE']))[0].steps).toHaveLength(4);
     expect((await a.defects.searchIssues({ text: '', testCaseKey: null, components: [], openOnly: true })).map((i) => i.key)).toEqual(['DEMO-101', 'DEMO-110']);
   });

@@ -1,5 +1,5 @@
 import type { TestCase, ValidationAttempt, ValidationResult } from '../domain/types';
-import type { RevalidationAdapter } from '../adapters/types';
+import type { RevalidationAdapter } from '../integrations/types';
 import { computeFingerprint } from './fingerprint';
 import { round, textSimilarity } from '../util/text';
 

@@ -1,7 +1,7 @@
 import http from 'http';
 import type { AddressInfo } from 'net';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { PlaywrightMcpAdapter, playwrightMcpConfigFromEnv } from '../../src/adapters/live/playwrightMcp';
+import { PlaywrightMcpAdapter, playwrightMcpConfigFromEnv } from '../../src/integrations/playwright-mcp/playwrightMcp';
 import type { TestCase } from '../../src/domain/types';
 import { Store } from '../../src/store/store';
 
