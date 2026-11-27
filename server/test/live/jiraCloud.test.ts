@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { JiraCloudAdapter, adfToText, jiraConfigFromEnv } from '../../src/adapters/live/jiraCloud';
+import { JiraCloudAdapter, adfToText, jiraConfigFromEnv } from '../../src/integrations/jira/jiraCloud';
 import { fakeFetch } from './fakeFetch';
 
 const issue = (key: string, extra: Record<string, unknown> = {}) => ({

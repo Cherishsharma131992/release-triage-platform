@@ -2,7 +2,7 @@ import express, { type NextFunction, type Request, type Response } from 'express
 import fs from 'fs';
 import path from 'path';
 import { z } from 'zod';
-import type { Adapters } from './adapters/types';
+import type { Adapters } from './integrations/types';
 import type { AssessmentService } from './pipeline/assessmentService';
 import type { ReleasePolicy } from './policy/policy';
 import type { Store } from './store/store';

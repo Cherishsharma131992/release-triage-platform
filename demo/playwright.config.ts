@@ -4,7 +4,7 @@ const env = process.env;
 const headed = env.HEADED === '1' || env.HEADED === 'true';
 
 export default defineConfig({
-  testDir: './e2e',
+  testDir: './automation-scripts',
   timeout: 15_000,
   retries: 0,
   workers: headed ? 1 : 4,
@@ -23,7 +23,7 @@ export default defineConfig({
     [
       'allure-playwright',
       {
-        resultsDir: env.ALLURE_RUN_DIR ?? 'allure-results/local',
+        resultsDir: env.ALLURE_RUN_DIR ?? 'allure-reports/local',
         environmentInfo: { RELEASE: env.DEMO_RELEASE ?? '1.0.0', BUILD: env.DEMO_BUILD ?? 'local', ENVIRONMENT: 'local-demo' },
       },
     ],

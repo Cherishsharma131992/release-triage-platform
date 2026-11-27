@@ -40,11 +40,11 @@ npx playwright install chromium   # once, or set DEMO_CHROME_PATH to an existing
 npm run demo:live                 # dashboard: http://localhost:4000
 ```
 
-This command runs a real pipeline end to end. Only Zephyr and Jira are replaced by JSON exports in `demo/data`, because they need accounts:
+This command runs a real pipeline end to end. Only Zephyr and Jira are replaced by JSON exports in `demo/integrations`, because they need accounts:
 
-1. Starts the **demo shop** (`demo/shop-app`) with injected bugs (`BUGS=vat,search`).
-2. Runs a **real Playwright suite** (`demo/e2e`, 14 tests). The `allure-playwright` reporter writes real Allure results with real screenshots to `demo/.live/allure-results/<run>`.
-3. Starts the platform with live Allure (`RESULTS_ADAPTER=live`) and **real Playwright MCP re-runs** (`REVALIDATION_ADAPTER=live`) against the shop. Zephyr test cases and Jira issues come from `demo/data/*.json` (`TCM_ADAPTER=file`, `DEFECTS_ADAPTER=file`).
+1. Starts the **demo shop** (`demo/application`) with injected bugs (`BUGS=vat,search`).
+2. Runs a **real Playwright suite** (`demo/automation-scripts`, 14 tests). The `allure-playwright` reporter writes real Allure results with real screenshots to `demo/allure-reports/live/<run>`.
+3. Starts the platform with live Allure (`RESULTS_ADAPTER=live`) and **real Playwright MCP re-runs** (`REVALIDATION_ADAPTER=live`) against the shop. Zephyr test cases and Jira issues come from `demo/integrations/zephyr/zephyr-testcases.json` and `demo/integrations/jira/jira-issues.json` (`TCM_ADAPTER=file`, `DEFECTS_ADAPTER=file`).
 
 | Test | Failure cause in the demo | Expected triage |
 |---|---|---|
@@ -57,12 +57,34 @@ This command runs a real pipeline end to end. Only Zephyr and Jira are replaced 
 
 Add `HEADED=1` to watch Chrome run the suite and the Playwright MCP re-runs, slowed down (`SLOW_MO`, `PLAYWRIGHT_MCP_STEP_DELAY_MS`). Run it again to add another execution; history then marks repeats as recurring. Use `BUGS=` (empty) for a clean build.
 
+## Project structure
+
+```
+server/                         Triage platform API (the application)
+  src/integrations/             One folder per external tool
+    jira/                       Jira Cloud REST + JSON-export adapters
+    zephyr/                     Zephyr Scale REST, JSON-export and mock adapters
+    allure/                     Allure results reader + mock
+    playwright-mcp/             Playwright MCP re-validation, step grammar, mock
+    shared/  mock-data/         HTTP/JSON helpers, mock fixtures
+    index.ts  mock.ts  types.ts Adapter selection, mock factory, contracts
+  src/pipeline  ai  policy  store  domain
+web/                            Executive dashboard (React + Vite)
+demo/                           Test automation framework for the live demo
+  application/                  Demo shop under test (injectable bugs)
+  automation-scripts/           Playwright specs
+  integrations/jira/            Jira issues export
+  integrations/zephyr/          Zephyr test cases export + Allure TMS link helper
+  allure-reports/               Allure results per run (git-ignored)
+  playwright.config.ts  run-live-demo.mjs
+```
+
 ## Architecture
 
 | Area | Location |
 |---|---|
 | Domain model | `server/src/domain/types.ts` |
-| Integration adapters (interfaces + mocks) | `server/src/adapters` |
+| Integration adapters (contracts, live, file and mock) | `server/src/integrations` |
 | Fingerprinting, history, Jira correlation, re-validation | `server/src/pipeline` |
 | AI providers (built-in heuristic, OpenAI/Anthropic) | `server/src/ai` |
 | Release policy (YAML + engine) | `server/config/release-policy.yaml`, `server/src/policy` |

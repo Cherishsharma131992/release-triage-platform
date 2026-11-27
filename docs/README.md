@@ -22,25 +22,25 @@ a fixed rulebook (the release policy) → shows GO, NO-GO or HOLD on a dashboard
 
 ### Server (the brain) — `server/src/`
 - [Domain & shared shapes](server/domain-types.md)
-- Adapters (the "translators" to external tools):
-  [contract](server/adapters-types.md) ·
-  [chooser](server/adapters-live-index.md) ·
-  [Allure reader](server/adapters-live-allureResults.md) ·
-  [Zephyr](server/adapters-live-zephyrScale.md) ·
-  [Jira Cloud](server/adapters-live-jiraCloud.md) ·
-  [browser re-runs](server/adapters-live-playwrightMcp.md) ·
-  [step translator](server/adapters-live-stepPlan.md) ·
-  [HTTP helper](server/adapters-live-http.md) ·
-  [file adapters](server/adapters-live-fileAdapters.md)
-- Mock adapters (pretend systems for demo/testing):
-  [factory](server/adapters-mock-index.md) ·
-  [Allure](server/adapters-mock-mockAllure.md) ·
-  [Zephyr](server/adapters-mock-mockZephyr.md) ·
-  [Playwright](server/adapters-mock-mockPlaywrightMcp.md) ·
-  [artifacts](server/adapters-mock-artifacts.md) ·
-  [failure data](server/adapters-mock-data-failures.md) ·
-  [Jira seed data](server/data-seeds-jira-issues.md) ·
-  [test-case data](server/adapters-mock-data-testCases.md)
+- Integrations (the "translators" to external tools) — `server/src/integrations/`:
+  [contract](server/integrations-types.md) ·
+  [chooser](server/integrations-index.md) ·
+  [mock factory](server/integrations-mock.md)
+  - Jira — `jira/`: [Jira Cloud](server/integrations-jira-jiraCloud.md) ·
+    [file export](server/integrations-file-adapters.md) ·
+    [Jira seed data](server/data-seeds-jira-issues.md)
+  - Zephyr — `zephyr/`: [Zephyr Scale](server/integrations-zephyr-zephyrScale.md) ·
+    [file export](server/integrations-file-adapters.md) ·
+    [mock](server/integrations-zephyr-mockZephyr.md)
+  - Allure — `allure/`: [results reader](server/integrations-allure-allureResults.md) ·
+    [mock](server/integrations-allure-mockAllure.md)
+  - Playwright MCP — `playwright-mcp/`: [browser re-runs](server/integrations-playwright-mcp-playwrightMcp.md) ·
+    [step translator](server/integrations-playwright-mcp-stepPlan.md) ·
+    [mock](server/integrations-playwright-mcp-mockPlaywrightMcp.md)
+  - Shared — `shared/`, `mock-data/`: [HTTP helper](server/integrations-shared-http.md) ·
+    [artifacts](server/integrations-shared-artifacts.md) ·
+    [failure data](server/integrations-mock-data-failures.md) ·
+    [test-case data](server/integrations-mock-data-testCases.md)
 - AI (the "thinking" part):
   [contract](server/ai-provider.md) ·
   [chooser](server/ai-index.md) ·
@@ -83,16 +83,18 @@ a fixed rulebook (the release policy) → shows GO, NO-GO or HOLD on a dashboard
   [Failure drawer](web/FailureDrawer.md) ·
   [Audit footer](web/AuditFooter.md)
 
-### Demo — `demo/`
+### Demo test automation framework — `demo/`
 - [Demo runner](demo/run-live-demo.md) ·
-  [Shop app](demo/shop-app-server.md) ·
-  [Playwright config](demo/playwright-config.md) ·
-  [Zephyr helper](demo/e2e-support.md) ·
-  [Zephyr data](demo/data-zephyr-testcases.md) ·
-  [Jira data](demo/data-jira-issues.md)
-- Test suites: [api](demo/e2e-api.md) · [auth](demo/e2e-auth.md) ·
-  [cart](demo/e2e-cart.md) · [catalog](demo/e2e-catalog.md) ·
-  [checkout](demo/e2e-checkout.md) · [home](demo/e2e-home.md)
+  [Playwright config](demo/playwright-config.md)
+- Application under test — `application/`: [Shop app](demo/application-server.md)
+- Automation scripts — `automation-scripts/`: [api](demo/automation-scripts-api.md) ·
+  [auth](demo/automation-scripts-auth.md) · [cart](demo/automation-scripts-cart.md) ·
+  [catalog](demo/automation-scripts-catalog.md) · [checkout](demo/automation-scripts-checkout.md) ·
+  [home](demo/automation-scripts-home.md)
+- Jira & Zephyr — `integrations/`: [Zephyr link helper](demo/integrations-zephyr-zephyrLink.md) ·
+  [Zephyr data](demo/integrations-zephyr-testcases.md) ·
+  [Jira data](demo/integrations-jira-issues.md)
+- Allure reports — `allure-reports/`: results per run (`local/`, `live/<run>`), git-ignored
 
 ### Build & config files
 - [root package.json](root-package.md) ·
