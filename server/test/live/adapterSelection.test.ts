@@ -19,6 +19,8 @@ describe('adapter selection', () => {
     expect(a.results.adapter).toBe('mock-allure');
     expect(() => createAdapters({ TCM_ADAPTER: 'live' }, store)).toThrow(/ZEPHYR_API_TOKEN/);
     expect(() => createAdapters({ TCM_ADAPTER: 'file' }, store)).toThrow(/ZEPHYR_TESTCASES_FILE/);
+    expect(() => createAdapters({ TCM_ADAPTER: 'testrail' }, store)).toThrow(/TESTRAIL_URL/);
+    expect(createAdapters({ TCM_ADAPTER: 'testrail', TESTRAIL_URL: 'https://x.testrail.io', TESTRAIL_USER: 'u', TESTRAIL_API_KEY: 'k' }, store).testCases.adapter).toBe('testrail');
   });
 
   it('reads the demo Zephyr/Jira exports', async () => {
