@@ -40,6 +40,14 @@ function start(cmd, args, opts) {
 
 const exited = (child) => new Promise((resolve) => child.on('exit', (code) => resolve(code)));
 
+async function isUp(url) {
+  try {
+    return (await fetch(url)).ok;
+  } catch {
+    return false;
+  }
+}
+
 async function waitFor(url, timeoutMs = 20_000) {
   const until = Date.now() + timeoutMs;
   while (Date.now() < until) {
@@ -62,9 +70,14 @@ try {
   if (!fs.existsSync(path.join(root, 'server', 'dist', 'index.js'))) throw new Error('Run `npm run build` first (or use `npm run demo:live`).');
   fs.mkdirSync(resultsRoot, { recursive: true });
 
-  log(`Starting demo shop on ${shopUrl} with injected bugs: ${bugs || 'none'}`);
-  start(process.execPath, [path.join(demoDir, 'shop-app', 'server.mjs')], { env: { ...env, SHOP_PORT: String(shopPort), BUGS: bugs } });
-  await waitFor(`${shopUrl}/health`);
+  // Reuse an already-running shop/platform instead of crashing on EADDRINUSE.
+  if (await isUp(`${shopUrl}/health`)) {
+    log(`Demo shop already running on ${shopUrl} — reusing it.`);
+  } else {
+    log(`Starting demo shop on ${shopUrl} with injected bugs: ${bugs || 'none'}`);
+    start(process.execPath, [path.join(demoDir, 'shop-app', 'server.mjs')], { env: { ...env, SHOP_PORT: String(shopPort), BUGS: bugs } });
+    await waitFor(`${shopUrl}/health`);
+  }
 
   const runDir = path.join(resultsRoot, runId);
   log(`Running the Playwright suite${headed ? ' (headed, slowed down)' : ''} -> Allure results in ${path.relative(root, runDir)}`);
@@ -79,25 +92,30 @@ try {
   log(`Playwright finished with exit code ${code} (failures are expected: the shop has injected bugs).`);
 
   const browserPath = env.PLAYWRIGHT_MCP_EXECUTABLE_PATH || env.DEMO_CHROME_PATH || bundledChromium();
-  log(`Starting the platform on http://localhost:${port} (live Allure + Playwright MCP, Zephyr/Jira from demo/data)`);
-  start(process.execPath, [path.join(root, 'server', 'dist', 'index.js')], {
-    cwd: root,
-    env: {
-      ...env,
-      PORT: String(port),
-      DB_PATH: path.join(live, 'triage.db'),
-      RESULTS_ADAPTER: 'live',
-      ALLURE_RESULTS_DIR: resultsRoot,
-      TCM_ADAPTER: env.TCM_ADAPTER ?? 'file',
-      ZEPHYR_TESTCASES_FILE: path.join(demoDir, 'data', 'zephyr-testcases.json'),
-      DEFECTS_ADAPTER: env.DEFECTS_ADAPTER ?? 'file',
-      JIRA_ISSUES_FILE: path.join(demoDir, 'data', 'jira-issues.json'),
-      REVALIDATION_ADAPTER: 'live',
-      PLAYWRIGHT_BASE_URL: shopUrl,
-      PLAYWRIGHT_MCP_EXECUTABLE_PATH: browserPath,
-      ...(headed ? { PLAYWRIGHT_MCP_HEADLESS: 'false', PLAYWRIGHT_MCP_STEP_DELAY_MS: env.PLAYWRIGHT_MCP_STEP_DELAY_MS ?? '600' } : {}),
-    },
-  });
+  const platformUrl = `http://localhost:${port}`;
+  if (await isUp(`${platformUrl}/api/health`)) {
+    log(`Platform already running on ${platformUrl} — its watcher will assess ${runId} automatically.`);
+  } else {
+    log(`Starting the platform on ${platformUrl} (live Allure + Playwright MCP, Zephyr/Jira from demo/data)`);
+    start(process.execPath, [path.join(root, 'server', 'dist', 'index.js')], {
+      cwd: root,
+      env: {
+        ...env,
+        PORT: String(port),
+        DB_PATH: path.join(live, 'triage.db'),
+        RESULTS_ADAPTER: 'live',
+        ALLURE_RESULTS_DIR: resultsRoot,
+        TCM_ADAPTER: env.TCM_ADAPTER ?? 'file',
+        ZEPHYR_TESTCASES_FILE: path.join(demoDir, 'data', 'zephyr-testcases.json'),
+        DEFECTS_ADAPTER: env.DEFECTS_ADAPTER ?? 'file',
+        JIRA_ISSUES_FILE: path.join(demoDir, 'data', 'jira-issues.json'),
+        REVALIDATION_ADAPTER: 'live',
+        PLAYWRIGHT_BASE_URL: shopUrl,
+        PLAYWRIGHT_MCP_EXECUTABLE_PATH: browserPath,
+        ...(headed ? { PLAYWRIGHT_MCP_HEADLESS: 'false', PLAYWRIGHT_MCP_STEP_DELAY_MS: env.PLAYWRIGHT_MCP_STEP_DELAY_MS ?? '600' } : {}),
+      },
+    });
+  }
   log(`Dashboard: http://localhost:${port}  ·  Demo shop: ${shopUrl}  ·  Ctrl+C to stop. Re-run the demo to add another execution.`);
 } catch (err) {
   console.error(`[demo] ${err.message}`);
