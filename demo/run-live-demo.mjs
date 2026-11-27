@@ -99,7 +99,7 @@ try {
   if (await isUp(`${platformUrl}/api/health`)) {
     log(`Platform already running on ${platformUrl} — its watcher will assess ${runId} automatically.`);
   } else {
-    log(`Starting the platform on ${platformUrl} (live Allure + Playwright MCP, Zephyr/Jira from demo/integrations)`);
+    log(`Starting the platform on ${platformUrl} (live Allure + Playwright MCP; test cases: ${env.TCM_ADAPTER ?? 'file'}, defects: ${env.DEFECTS_ADAPTER ?? 'file'})`);
     start(process.execPath, [path.join(root, 'server', 'dist', 'index.js')], {
       cwd: root,
       env: {

@@ -147,7 +147,7 @@ npm run testrail:import -- --dry-run
 npm run testrail:import        # creates the 14 cases (separated steps) under section "Failure Triage Demo" / <component>
 TCM_ADAPTER=testrail
 ```
-Keys are TestRail case IDs (`C123`). Component, business-critical, revalidation and script path are written as lines in the case's Preconditions (`Component: …`, `Business critical: yes`, `Playwright revalidation: approved`, `Automation script: …`), so no TestRail custom fields are needed; cases created by hand without them still load. The import writes `demo/integrations/testrail/testrail-key-map.json`; with `TCM_ADAPTER=testrail` the Playwright specs report the TestRail IDs and link to the case. To link Jira bugs directly, label them with the case ID and set `ZEPHYR_TEST_CASE_KEY_PATTERN=C\d+`.
+Keys are TestRail case IDs (`C123`). Component, business-critical, revalidation and script path are written as lines in the case's Preconditions (`Component: …`, `Business critical: yes`, `Playwright revalidation: approved`, `Automation script: …`), so no TestRail custom fields are needed; cases created by hand without them still load. The import writes `demo/integrations/testrail/testrail-key-map.json`; with `TCM_ADAPTER=testrail` the Playwright specs report the TestRail IDs and link to the case. To link a Jira bug directly to a case, add the case ID (e.g. `C51`) as a label or in the summary; with `TCM_ADAPTER=testrail` the Jira adapter looks for `C\d+` keys.
 
 Importing the demo test cases into your Zephyr Scale project (one-time, safe to re-run: cases whose name already exists are skipped):
 ```
