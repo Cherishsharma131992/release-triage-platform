@@ -178,7 +178,7 @@ export class AssessmentService {
         businessCritical: p.testCase?.businessCritical ?? false,
         errorMessage: r.errorMessage,
         stackTrace: r.stackTrace,
-        scriptPath: p.testCase?.automationScript ?? r.scriptPath,
+        scriptPath: p.testCase?.automationScript || r.scriptPath,
         testCase: p.testCase,
         history: p.history,
         jira,

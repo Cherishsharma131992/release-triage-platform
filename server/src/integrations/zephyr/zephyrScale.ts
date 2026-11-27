@@ -52,6 +52,9 @@ interface ZephyrStepsPage {
 
 const truthy = (v: unknown) => v === true || (typeof v === 'string' && /^(true|yes|y|1|approved)$/i.test(v.trim()));
 
+/** Objective line written by `npm run zephyr:import` when no script custom field is configured. */
+const SCRIPT_LINE = /^Automation script: *(\S+) *$/m;
+
 export function normalizeZephyrPriority(name: string | undefined): TestCasePriority {
   const n = (name ?? '').toLowerCase();
   if (/critical|blocker|highest|p0|p1/.test(n)) return 'Critical';
@@ -99,15 +102,16 @@ export class ZephyrScaleAdapter implements TestCaseManagementAdapter {
     const cf = tc.customFields ?? {};
     const labels = tc.labels ?? [];
     const component = cf[this.cfg.componentField];
+    const objective = stripHtml(tc.objective);
     return {
       key: tc.key,
       name: tc.name,
-      objective: stripHtml(tc.objective),
+      objective: objective.replace(SCRIPT_LINE, '').trim(),
       component: typeof component === 'string' && component ? component : (labels.find((l) => l.startsWith('component:'))?.slice(10) ?? 'Unassigned'),
       priority: normalizeZephyrPriority(priority),
       businessCritical: truthy(cf[this.cfg.businessCriticalField]) || labels.includes(this.cfg.businessCriticalLabel),
       steps,
-      automationScript: typeof cf[this.cfg.scriptField] === 'string' ? (cf[this.cfg.scriptField] as string) : '',
+      automationScript: typeof cf[this.cfg.scriptField] === 'string' ? (cf[this.cfg.scriptField] as string) : (SCRIPT_LINE.exec(objective)?.[1] ?? ''),
       playwrightRevalidationApproved: truthy(cf[this.cfg.revalidationField]) || labels.includes(this.cfg.revalidationLabel),
       labels,
     };

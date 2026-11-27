@@ -136,10 +136,19 @@ JIRA_PROJECT_KEYS=SCRUM
 ```
 The startup log then shows `defects=jira-cloud`.
 
+Importing the demo test cases into your Zephyr Scale project (one-time, safe to re-run: cases whose name already exists are skipped):
+```
+ZEPHYR_API_TOKEN=<Zephyr Scale API access token: Jira → your avatar → Zephyr API keys>
+ZEPHYR_PROJECT_KEY=SCRUM          # defaults to the first JIRA_PROJECT_KEYS entry
+npm run zephyr:import -- --dry-run   # shows what would be created
+npm run zephyr:import                # creates the 14 cases (with steps) in folder "Failure Triage Demo"
+```
+Component, business-critical and revalidation flags are stored as labels and the script path as an `Automation script:` line in the objective, so no Zephyr custom fields are needed. The import writes `demo/integrations/zephyr/zephyr-key-map.json` (local key → Zephyr key, e.g. `DEMO-T1` → `SCRUM-T1`); with `TCM_ADAPTER=live` the Playwright specs report the Zephyr keys, so the platform reads the cases from Zephyr. Jira bugs should reference the Zephyr keys (e.g. label `SCRUM-T4`) to be linked directly.
+
 | Integration | Switch | Live settings |
 |---|---|---|
 | Allure results (CI `allure-results` dirs) | `RESULTS_ADAPTER` | `ALLURE_RESULTS_DIR`: one sub-directory per execution. Release/environment from `environment.properties` (`RELEASE`, `ENVIRONMENT`), build/CI link from `executor.json`. Retries collapse to the last attempt. |
-| Zephyr Scale Cloud (API v2) | `TCM_ADAPTER` | `ZEPHYR_API_TOKEN`, optional `ZEPHYR_BASE_URL` (EU: `https://eu.api.zephyrscale.smartbear.com/v2`). Custom fields/labels: `Automation Script`, `Business Critical` / `business-critical`, `Playwright Revalidation` / `playwright-revalidation`, `Component`. |
+| Zephyr Scale Cloud (API v2) | `TCM_ADAPTER` | `ZEPHYR_API_TOKEN`, optional `ZEPHYR_BASE_URL` (EU: `https://eu.api.zephyrscale.smartbear.com/v2`), `ZEPHYR_PROJECT_KEY` for the import. Custom fields/labels: `Automation Script`, `Business Critical` / `business-critical`, `Playwright Revalidation` / `playwright-revalidation`, `Component`. |
 | Jira Cloud (REST v3) | `DEFECTS_ADAPTER` | `JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN`, `JIRA_PROJECT_KEYS`, optional `JIRA_SEVERITY_FIELD` (e.g. `customfield_10050`, otherwise severity is derived from priority) and `JIRA_BUG_ISSUE_TYPES`. Test case keys in labels/summary become direct links. |
 | Playwright MCP | `REVALIDATION_ADAPTER` | `PLAYWRIGHT_BASE_URL` (app under test). `PLAYWRIGHT_MCP_URL` for a running server (Streamable HTTP); otherwise `@playwright/mcp` is spawned headless per attempt (`PLAYWRIGHT_MCP_EXECUTABLE_PATH` to pick a browser). |
 
