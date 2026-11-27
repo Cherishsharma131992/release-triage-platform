@@ -14,7 +14,8 @@
     "start": "npm run start -w server",
     "test": "npm test -w server",
     "typecheck": "npm run typecheck -w server && npm run typecheck -w web",
-    "demo:live": "npm run build && npm run live -w demo"
+    "demo:live": "npm run build && npm run live -w demo",
+    "zephyr:import": "npm run zephyr:import -w server --"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"
