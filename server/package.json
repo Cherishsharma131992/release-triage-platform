@@ -9,7 +9,8 @@
     "start": "node dist/index.js",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "zephyr:import": "tsx src/cli/zephyrImport.ts"
+    "zephyr:import": "tsx src/cli/zephyrImport.ts",
+    "testrail:import": "tsx src/cli/testrailImport.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",

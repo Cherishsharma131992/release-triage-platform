@@ -64,6 +64,7 @@ server/                         Triage platform API (the application)
   src/integrations/             One folder per external tool
     jira/                       Jira Cloud REST + JSON-export adapters
     zephyr/                     Zephyr Scale REST, JSON-export and mock adapters
+    testrail/                   TestRail REST adapter + import
     allure/                     Allure results reader + mock
     playwright-mcp/             Playwright MCP re-validation, step grammar, mock
     shared/  mock-data/         HTTP/JSON helpers, mock fixtures
@@ -136,6 +137,18 @@ JIRA_PROJECT_KEYS=SCRUM
 ```
 The startup log then shows `defects=jira-cloud`.
 
+Using **TestRail** for test cases instead of Zephyr:
+```
+TESTRAIL_URL=https://yourco.testrail.io
+TESTRAIL_USER=you@example.com
+TESTRAIL_API_KEY=<TestRail → My Settings → API Keys>   # also tick Administration → Site Settings → API → Enable API
+TESTRAIL_PROJECT=Failure Triage Project                # name or id; created if missing
+npm run testrail:import -- --dry-run
+npm run testrail:import        # creates the 14 cases (separated steps) under section "Failure Triage Demo" / <component>
+TCM_ADAPTER=testrail
+```
+Keys are TestRail case IDs (`C123`). Component, business-critical, revalidation and script path are written as lines in the case's Preconditions (`Component: …`, `Business critical: yes`, `Playwright revalidation: approved`, `Automation script: …`), so no TestRail custom fields are needed; cases created by hand without them still load. The import writes `demo/integrations/testrail/testrail-key-map.json`; with `TCM_ADAPTER=testrail` the Playwright specs report the TestRail IDs and link to the case. To link Jira bugs directly, label them with the case ID and set `ZEPHYR_TEST_CASE_KEY_PATTERN=C\d+`.
+
 Importing the demo test cases into your Zephyr Scale project (one-time, safe to re-run: cases whose name already exists are skipped):
 ```
 ZEPHYR_API_TOKEN=<Zephyr Scale API access token: Jira → your avatar → Zephyr API keys>
@@ -149,6 +162,7 @@ Component, business-critical and revalidation flags are stored as labels and the
 |---|---|---|
 | Allure results (CI `allure-results` dirs) | `RESULTS_ADAPTER` | `ALLURE_RESULTS_DIR`: one sub-directory per execution. Release/environment from `environment.properties` (`RELEASE`, `ENVIRONMENT`), build/CI link from `executor.json`. Retries collapse to the last attempt. |
 | Zephyr Scale Cloud (API v2) | `TCM_ADAPTER` | `ZEPHYR_API_TOKEN`, optional `ZEPHYR_BASE_URL` (EU: `https://eu.api.zephyrscale.smartbear.com/v2`), `ZEPHYR_PROJECT_KEY` for the import. Custom fields/labels: `Automation Script`, `Business Critical` / `business-critical`, `Playwright Revalidation` / `playwright-revalidation`, `Component`. |
+| TestRail (API v2) | `TCM_ADAPTER=testrail` | `TESTRAIL_URL`, `TESTRAIL_USER`, `TESTRAIL_API_KEY`; `TESTRAIL_PROJECT` / optional `TESTRAIL_SUITE_ID` for the import. |
 | Jira Cloud (REST v3) | `DEFECTS_ADAPTER` | `JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN`, `JIRA_PROJECT_KEYS`, optional `JIRA_SEVERITY_FIELD` (e.g. `customfield_10050`, otherwise severity is derived from priority) and `JIRA_BUG_ISSUE_TYPES`. Test case keys in labels/summary become direct links. |
 | Playwright MCP | `REVALIDATION_ADAPTER` | `PLAYWRIGHT_BASE_URL` (app under test). `PLAYWRIGHT_MCP_URL` for a running server (Streamable HTTP); otherwise `@playwright/mcp` is spawned headless per attempt (`PLAYWRIGHT_MCP_EXECUTABLE_PATH` to pick a browser). |
 
