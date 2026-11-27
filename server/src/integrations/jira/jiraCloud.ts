@@ -10,7 +10,7 @@ export interface JiraCloudConfig {
   issueTypes: string[];
   /** Custom field holding severity (e.g. customfield_10050). Falls back to priority when unset. */
   severityField: string | null;
-  /** Regex used to find Zephyr test case keys in labels/summary (e.g. SHOP-T\d+). */
+  /** Regex used to find test case keys in labels/summary (Zephyr SHOP-T12, or TestRail C123 when TCM_ADAPTER=testrail). */
   testCaseKeyPattern: string;
   maxResults: number;
   fetchImpl?: typeof fetch;
@@ -24,7 +24,8 @@ export function jiraConfigFromEnv(env: NodeJS.ProcessEnv): JiraCloudConfig {
     projects: requireEnv(env, 'JIRA_PROJECT_KEYS').split(',').map((s) => s.trim()).filter(Boolean),
     issueTypes: (env.JIRA_BUG_ISSUE_TYPES ?? 'Bug').split(',').map((s) => s.trim()).filter(Boolean),
     severityField: env.JIRA_SEVERITY_FIELD?.trim() || null,
-    testCaseKeyPattern: env.ZEPHYR_TEST_CASE_KEY_PATTERN ?? '[A-Z][A-Z0-9]+-T\\d+',
+    testCaseKeyPattern:
+      env.ZEPHYR_TEST_CASE_KEY_PATTERN ?? (env.TCM_ADAPTER?.toLowerCase() === 'testrail' ? 'C\\d+' : '[A-Z][A-Z0-9]+-T\\d+'),
     maxResults: Number(env.JIRA_MAX_RESULTS ?? 100),
   };
 }
