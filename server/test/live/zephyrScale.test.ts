@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ZephyrScaleAdapter, zephyrConfigFromEnv } from '../../src/adapters/live/zephyrScale';
+import { ZephyrScaleAdapter, zephyrConfigFromEnv } from '../../src/integrations/zephyr/zephyrScale';
 import { fakeFetch } from './fakeFetch';
 
 describe('ZephyrScaleAdapter', () => {

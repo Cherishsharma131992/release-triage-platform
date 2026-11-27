@@ -4,7 +4,7 @@
   "private": true,
   "description": "Demo shop, Playwright + Allure suite and live end-to-end demo of the triage platform",
   "scripts": {
-    "shop": "node shop-app/server.mjs",
+    "shop": "node application/server.mjs",
     "e2e": "playwright test",
     "live": "node run-live-demo.mjs"
   },

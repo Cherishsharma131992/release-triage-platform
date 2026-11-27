@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { RevalidationAdapter, RevalidationRun } from '../src/adapters/types';
+import type { RevalidationAdapter, RevalidationRun } from '../src/integrations/types';
 import { revalidate, sameUnmetExpectation } from '../src/pipeline/revalidation';
 import type { TestCase } from '../src/domain/types';
 

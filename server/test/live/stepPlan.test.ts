@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { planStep, planTestCase } from '../../src/adapters/live/stepPlan';
+import { planStep, planTestCase } from '../../src/integrations/playwright-mcp/stepPlan';
 
 const step = (action: string, expected = '') => ({ index: 1, action, expected });
 const base = 'https://shop.example.com/app';

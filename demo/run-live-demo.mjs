@@ -17,7 +17,7 @@ const bugs = env.BUGS ?? 'vat,search';
 const release = env.DEMO_RELEASE ?? '1.0.0';
 const headed = env.HEADED === '1' || env.HEADED === 'true';
 const runId = `demo-run-${new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '').replace('T', '-')}`;
-const resultsRoot = path.join(live, 'allure-results');
+const resultsRoot = path.join(demoDir, 'allure-reports', 'live');
 const children = [];
 
 /** Chromium installed by `npx playwright install chromium`, reused for the Playwright MCP re-runs. */
@@ -75,7 +75,7 @@ try {
     log(`Demo shop already running on ${shopUrl} — reusing it.`);
   } else {
     log(`Starting demo shop on ${shopUrl} with injected bugs: ${bugs || 'none'}`);
-    start(process.execPath, [path.join(demoDir, 'shop-app', 'server.mjs')], { env: { ...env, SHOP_PORT: String(shopPort), BUGS: bugs } });
+    start(process.execPath, [path.join(demoDir, 'application', 'server.mjs')], { env: { ...env, SHOP_PORT: String(shopPort), BUGS: bugs } });
     await waitFor(`${shopUrl}/health`);
   }
 
@@ -96,7 +96,7 @@ try {
   if (await isUp(`${platformUrl}/api/health`)) {
     log(`Platform already running on ${platformUrl} — its watcher will assess ${runId} automatically.`);
   } else {
-    log(`Starting the platform on ${platformUrl} (live Allure + Playwright MCP, Zephyr/Jira from demo/data)`);
+    log(`Starting the platform on ${platformUrl} (live Allure + Playwright MCP, Zephyr/Jira from demo/integrations)`);
     start(process.execPath, [path.join(root, 'server', 'dist', 'index.js')], {
       cwd: root,
       env: {
@@ -106,9 +106,9 @@ try {
         RESULTS_ADAPTER: 'live',
         ALLURE_RESULTS_DIR: resultsRoot,
         TCM_ADAPTER: env.TCM_ADAPTER ?? 'file',
-        ZEPHYR_TESTCASES_FILE: path.join(demoDir, 'data', 'zephyr-testcases.json'),
+        ZEPHYR_TESTCASES_FILE: path.join(demoDir, 'integrations', 'zephyr', 'zephyr-testcases.json'),
         DEFECTS_ADAPTER: env.DEFECTS_ADAPTER ?? 'file',
-        JIRA_ISSUES_FILE: path.join(demoDir, 'data', 'jira-issues.json'),
+        JIRA_ISSUES_FILE: path.join(demoDir, 'integrations', 'jira', 'jira-issues.json'),
         REVALIDATION_ADAPTER: 'live',
         PLAYWRIGHT_BASE_URL: shopUrl,
         PLAYWRIGHT_MCP_EXECUTABLE_PATH: browserPath,
