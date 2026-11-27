@@ -124,7 +124,17 @@ demo/                           Test automation framework for the live demo
 
 ## Live integrations
 
-Each integration can be switched independently (`mock` | `live`), so you can connect Jira first and keep the rest mocked. See `.env.example`.
+Each integration can be switched independently (`mock` | `live`), so you can connect Jira first and keep the rest mocked. Copy `.env.example` to `.env` (git-ignored); the server and `npm run demo:live` load it on start, and variables already set in the shell win (`ENV_FILE` points to another file).
+
+Example: live Jira, everything else unchanged (also applies to `npm run demo:live`):
+```
+DEFECTS_ADAPTER=live
+JIRA_BASE_URL=https://yourco.atlassian.net
+JIRA_EMAIL=you@example.com
+JIRA_API_TOKEN=<Atlassian API token>
+JIRA_PROJECT_KEYS=SCRUM
+```
+The startup log then shows `defects=jira-cloud`.
 
 | Integration | Switch | Live settings |
 |---|---|---|
